@@ -9,7 +9,7 @@ from flask_restx import Resource, Api, fields
 ##
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///db.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS']='True'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']='False'
 app.config['SECRET_KEY']='True'
 
 db = SQLAlchemy(app)
@@ -21,6 +21,8 @@ api.init_app(app)
 # DATABASE TABLES
 ##
 class Appoitment(db.Model):
+    __tablename__ = 'Appoitment'
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(20))
     lastName = db.Column(db.String(20))
@@ -28,18 +30,20 @@ class Appoitment(db.Model):
     typeAppoitment = db.Column(db.String(2), nullable=True)
     time = db.Column(db.String(5), nullable=True)
     date = db.Column(db.DateTime, default=datetime.utcnow)
-    availableDay = db.relationship('AvailableDay', backref='appoitment', lazy=True)
+    availableDay = db.relationship('AvialableDay', backref='Appoitment', lazy=True)
 
 class AvialableDay(db.Model):
+    __tablename__ = 'AvialableDay'
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    appoitmenID = db.Column(db.Integer, db.ForeignKey('appoitment.id'))
+    appoitmenID = db.Column(db.Integer, db.ForeignKey('Appoitment.id'))
     date = db.Column(db.DateTime, default=datetime.utcnow)
     avialable = db.Column(db.Boolean, default=True)
 
 ##
 # MODELS
 ##
-model = api.model('appoitment',{
+appoitmentModel = api.model('appoitment',{
     'name':fields.String('Enter name'),
     'lastName':fields.String('Enter a last name'),
     'phone':fields.String('Enter a phone number'),
@@ -48,7 +52,7 @@ model = api.model('appoitment',{
     'date':fields.DateTime('PickUp a date')
 })
 
-model = api.model('availableDay',{
+availableDayMode = api.model('availableDay',{
     'appoitmentID':fields.Integer('Enter an appoitment id'),
     'date':fields.DateTime('PickUp a date'),
 })
@@ -80,7 +84,7 @@ class getAppoitments(Resource):
 
 @api.route('/post/appoitment')
 class insertAppoitment(Resource):
-    @api.expect(model)
+    @api.expect(appoitmentModel)
     def post(self):
         appoitment = Appoitment(
             name = request.json['name'], 
