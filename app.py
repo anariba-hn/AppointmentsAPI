@@ -77,10 +77,12 @@ availableDays_schema = AvailableDaySchema(many=True)
 ##
 # HTTP ROUTES
 ##
-@api.route('/get/index')
+@api.route('/get/appoitments')
 class getAppoitments(Resource):
     def get(self):
-        return {'message': 'Alive'}
+        response = jsonify(appoitments_schema.dump(Appoitment.query.all()))
+        response.status_code = 200
+        return response
 
 @api.route('/post/appoitment')
 class insertAppoitment(Resource):
@@ -92,23 +94,24 @@ class insertAppoitment(Resource):
             phone = request.json['phone'],
             typeAppoitment = request.json['typeAppoitment'],
             time = request.json['time'],
-            date = request.json['date'],
+            date = datetime.strptime(request.json['date'],'%Y-%m-%d')
         )
         #availableDay validations here
         db.session.add(appoitment)
 
-        if db.session.commit():
+        if appoitment.id is not 0:
             availableDay = AvialableDay(
-                appoitmentID = Appoitment.id,
-                date = Appoitment.date,
+                appoitmenID = appoitment.id,
+                date = appoitment.date,
             )
             db.session.add(availableDay)
+            db.session.commit()
 
-            if db.session.commit():
-                return {'message':'data has ben inserted'}
-
+            if availableDay is not 0:
+                return {'message':'data has been inserted'}, 201
         db.session.rollback()        
-        return {'message':'Ups.. something goes wrong. Contact the suport team.'}
+        return {'message':'Ups.. something goes wrong. Contact the suport team.'}, 401
+
 
 if app == "__main__":
     app.run(debug=True)
