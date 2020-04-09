@@ -99,7 +99,7 @@ class insertAppoitment(Resource):
         #availableDay validations here
         db.session.add(appoitment)
 
-        if appoitment.id is not 0:
+        if appoitment.id != 0:
             availableDay = AvialableDay(
                 appoitmenID = appoitment.id,
                 date = appoitment.date,
@@ -107,7 +107,7 @@ class insertAppoitment(Resource):
             db.session.add(availableDay)
             db.session.commit()
 
-            if availableDay is not 0:
+            if availableDay != 0:
                 return {'message':'data has been inserted'}, 201
         db.session.rollback()        
         return {'message':'Ups.. something goes wrong. Contact the suport team.'}, 401
