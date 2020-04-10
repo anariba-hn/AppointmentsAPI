@@ -109,9 +109,36 @@ class insertAppoitment(Resource):
 
             if availableDay != 0:
                 return {'message':'data has been inserted'}, 201
+
         db.session.rollback()        
         return {'message':'Ups.. something goes wrong. Contact the suport team.'}, 401
 
+@api.route('/put/appoitment/<int:id>')
+class putAppoitment(Resource):
+    @api.expect(appoitmentModel)
+    def put(self,id):
+        appoitment = Appoitment.query.get(id),
+        name = request.json['name'],
+        lastName = request.json['lastName'],
+        phone = request.json['phone'],
+        typeAppoitment = request.json['typeAppoitment'],
+        time = request.json['time'],
+        date = request.json['date']
+        db.session.commit()
+        return {'message':'data has been updated.'}, 202
+
+@api.route('/delete/appoitment/<int:id>')
+class deleteAppoitment(Resource):
+    def delete(self,id):
+        appoitment = Appoitment.query.get(id),
+
+        if appoitment == None:
+            return {'message':'Sorry, the appointment identify was not found. Please try again.'}, 204
+        
+        db.session.delete(id)
+        db.session.commit()
+        return {'message':'data has been successful deleted.'}, 202
+            
 
 if app == "__main__":
     app.run(debug=True)
